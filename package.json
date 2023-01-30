@@ -1,0 +1,31 @@
+{
+  "name": "role-reward",
+  "version": "1.0.0",
+  "description": "It is a tool to be able to give a role of a discord server as a reward for channel points.",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "jest ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VeguiDev/role-reward.git"
+  },
+  "keywords": [
+    "TWITCH",
+    "DISCORD",
+    "ROLE",
+    "REWARD",
+    "BRIDGE"
+  ],
+  "author": "VeguiDev",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/VeguiDev/role-reward/issues"
+  },
+  "homepage": "https://github.com/VeguiDev/role-reward#readme",
+  "dependencies": {
+    "@twurple/api": "^5.3.4",
+    "@twurple/auth": "^5.3.4",
+    "@twurple/eventsub-ws": "^5.3.4"
+  }
+}
