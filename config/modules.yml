@@ -1,2 +1,4 @@
 webserver:
   enabled: true
+discord:
+  enabled: true
