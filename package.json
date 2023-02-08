@@ -26,6 +26,7 @@
   "homepage": "https://github.com/VeguiDev/role-reward#readme",
   "dependencies": {
     "axios": "^1.2.6",
+    "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "morgan": "^1.10.0",
     "yaml": "^2.2.1"
