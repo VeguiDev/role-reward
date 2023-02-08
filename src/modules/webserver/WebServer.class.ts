@@ -2,6 +2,7 @@ import express from 'express';
 import morgan from 'morgan';
 import { AuthController } from './routes/auth.routes';
 import { ChannelController } from './routes/channel.routes';
+import { DiscordController } from './routes/discord.routes';
 import { HomeController } from './routes/home.routes';
 
 export class WebServer {
@@ -35,6 +36,7 @@ export class WebServer {
         this.app.use(HomeController);
         this.app.use("/auth", AuthController);
         this.app.use("/channel", ChannelController);
+        this.app.use("/discord", DiscordController);
 
     }
 
