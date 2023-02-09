@@ -56,6 +56,45 @@ app.get("/oauth", async (req, r) => {
     }
 });
 
+app.get("/logout", async (req, res) => {
+
+    const authStore = AuthStore.getInstance();
+
+    try {
+
+        if(await authStore.logout()) {
+            res.json({
+                success:true,
+                code: "logout_success"
+            });
+        } else {
+
+            res.status(500).json({
+                error: "cant::logout",
+                message: "Can't close session"
+            });
+
+        }
+
+    } catch(e) {
+
+        if(e == "cant_you_dont_have_session") {
+
+            res.status(400).json({
+                error: "dont_have::session",
+                message: "You dont have session"
+            });
+
+        } else {
+            res.status(500).json({
+                error: "cant::logout",
+                message: "Can't close session"
+            });
+        }
+
+    }
+});
+
 export {
     app as AuthController
 }

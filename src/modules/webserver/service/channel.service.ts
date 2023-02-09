@@ -1,4 +1,4 @@
-import {GetChannelReward, GetChannelRewards} from '../../../api/users.service';
+import {GetChannelReward, GetChannelRewardRedemption, GetChannelRewards} from '../../../api/users.service';
 import AuthStore from '../../../class/AuthStore.class';
 
 export default class ChannelService {
@@ -36,7 +36,7 @@ export default class ChannelService {
 
         if(!error) {
 
-            return data.data;
+            return data.data[0];
 
         }
         
@@ -45,5 +45,26 @@ export default class ChannelService {
 
     }
 
+
+    async getChannelRewardRedemptions(id:string) {
+
+        const credentials = await AuthStore.getInstance().getCredentials();
+
+        if(!credentials) {
+            throw "not_credentials";
+        }
+
+        const {error, data, res} = await GetChannelRewardRedemption(credentials.user.user_id, id);
+
+        if(!error) {
+
+            return data.data[0];
+
+        }
+        
+        console.error(error);
+        return null;
+
+    }
 
 }
