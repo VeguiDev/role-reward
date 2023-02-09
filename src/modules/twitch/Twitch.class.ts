@@ -27,6 +27,11 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
 
     }
 
+    private async reconnect(url:string) {
+        this.client.abort();
+        this.client.connect(url);
+    }
+
     private async processMessage(message: Message) {
 
         if(message.type == "binary") return;
@@ -43,6 +48,8 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
                 console.log("[TWITCH]: Can't connect to EventSub event");
             }
 
+        } else if(data.metadata.message_type == "session_reconnect") {
+            await this.reconnect(data.event.session.reconnect_url);
         } else if(data.metadata.message_type == 'notification') {
             return this.processNotification(data.payload);
         }
