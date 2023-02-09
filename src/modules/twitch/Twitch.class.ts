@@ -9,8 +9,12 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
     private static instance: TwitchModule;
 
     client: WebSocketClient = new WebSocketClient();
+    old_client: WebSocketClient = new WebSocketClient();
 
     session_id: string | null = null;
+
+    is_reconnecting:boolean = false;
+    reconnect_url:string = "";
 
     private async processNotification(data:any) {
         console.log(data);
@@ -28,8 +32,8 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
     }
 
     private async reconnect(url:string) {
-        this.client.abort();
-        this.client.connect(url);
+        this.is_reconnecting = true;
+        await this.listen(url);
     }
 
     private async processMessage(message: Message) {
@@ -41,11 +45,23 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
         if (data.metadata.message_type == 'session_welcome') {
             this.session_id = data.payload.session.id;
             
-            if(await this.subscribeEvent()) {
-                this.emit("subscribed", this);
-                console.log("[TWITCH]: Connected to EventSub event");
+            if(this.is_reconnecting) {
+
+                this.is_reconnecting = false;
+
+                this.old_client.abort();
+
+                console.log("[TWITCH]: Webhook reconnected!");
+
             } else {
-                console.log("[TWITCH]: Can't connect to EventSub event");
+
+                if(await this.subscribeEvent()) {
+                    this.emit("subscribed", this);
+                    console.log("[TWITCH]: Connected to EventSub event");
+                } else {
+                    console.log("[TWITCH]: Can't connect to EventSub event");
+                }
+
             }
 
         } else if(data.metadata.message_type == "session_reconnect") {
@@ -71,7 +87,12 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
 
     }
 
-    async listen() {
+    async listen(reconnect_url?:string) {
+        if(reconnect_url) {
+            this.old_client = this.client;
+            this.client = new WebSocketClient();
+        }
+
         this.client.on('connectFailed', function (error) {
             console.log('Connect Error: ' + error.toString());
         });
@@ -96,7 +117,7 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
             });
         });
 
-        this.client.connect('wss://eventsub-beta.wss.twitch.tv/ws');
+        this.client.connect(reconnect_url || 'wss://eventsub-beta.wss.twitch.tv/ws');
     }
 
     static getInstance() {
