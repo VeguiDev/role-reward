@@ -1,11 +1,11 @@
 
 export type EventCallback = (...values:any) => any;
 
-export default class ClassEvents<T extends string> {
+export default class ClassEvents<T> {
 
     private eventsHandlers:EventHandler[] = [];
 
-    emit(event:T, ...values:any) {
+    emit(event:T extends string ? T : never, ...values:any) {
 
         this.eventsHandlers.filter(e => e.event_name == event).forEach(event => {
             event.handle(...values);
@@ -13,11 +13,11 @@ export default class ClassEvents<T extends string> {
 
     }
 
-    addEventListener(event:T, cb:EventCallback) {
+    addEventListener(event:T extends string ? T : never, cb:EventCallback) {
         return this.on(event, cb);
     }
 
-    on(event:T, cb:EventCallback) {
+    on(event:T extends string ? T : never, cb:EventCallback) {
 
         return this.eventsHandlers.push(new EventHandler(event, cb));
 

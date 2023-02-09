@@ -32,4 +32,16 @@ export class ActionConfig extends ConfigFile<ActionFile> {
         return this.data.actions.find(action => action.on == reward_id);
     }
 
+    addAction(reward_id:string, roles:string[]) {
+
+        let newReward = {
+            on: reward_id,
+            rewards: roles
+        };
+
+        this.data.actions.push(newReward);
+        this.save();
+        return newReward;
+    }
+
 }

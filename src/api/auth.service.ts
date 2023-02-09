@@ -1,5 +1,6 @@
 import axios from 'axios';
 import path from 'path';
+import { replaceData, replaceDataInConfig } from './lib/RequestDataReplacer.lib';
 
 const apiClient = axios.create({
     baseURL: "https://id.twitch.tv",
@@ -15,7 +16,7 @@ export function getAuthorizeUrl() {
     query.set('client_id', process.env.CLIENT_ID as string);
     query.set(
         'scope',
-        'channel:read:redemptions moderator:manage:banned_users moderator:manage:chat_messages user:read:email chat:read whispers:edit'
+        'channel:manage:redemptions moderator:manage:banned_users moderator:manage:chat_messages user:read:email chat:read whispers:edit'
     );
     query.set('redirect_uri', 'http://localhost:4000/auth/oauth');
 
@@ -125,6 +126,49 @@ export async function getCurrentUser(token:string) {
             method: "GET",
             headers: {
                 Authorization: "Bearer "+token
+            }
+        })
+
+        return {
+            error: null,
+            data: res.data,
+            res
+        };
+
+    } catch(e) {
+
+        if(axios.isAxiosError(e)) {
+
+            if(e.response) {
+
+                return {
+                    error: e,
+                    data: e.response.data,
+                    res: e.response
+                }
+
+            }
+
+        }
+
+        return {
+            error: e,
+            data: null,
+            res: null
+        }
+
+    }
+}
+
+export async function revokeToken(token:string) {
+    try {
+
+        let res = await apiClient({
+            url:"oauth2/revoke",
+            method: "POST",
+            params: {
+                client_id: process.env.CLIENT_ID,
+                token
             }
         })
 

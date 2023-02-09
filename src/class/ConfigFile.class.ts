@@ -1,8 +1,12 @@
 import path from 'path';
 import fs from 'fs';
 import yaml from 'yaml';
+import ClassEvents from './ClassEvent.class';
+import { AllKeys } from '../interfaces/AllKeys.type';
 
-export class ConfigFile<T = any> {
+export type ConfigFileEvents = "load"|"updated";
+
+export class ConfigFile<T extends object, E = ConfigFileEvents> extends ClassEvents<E|ConfigFileEvents> {
 
     path:string;
     dirpath:string;
@@ -10,6 +14,7 @@ export class ConfigFile<T = any> {
     data:T;
 
     constructor(fpath:string, data:any = {}) {
+        super();
         if(!path.isAbsolute(fpath)) {
             fpath = path.resolve(__dirname, fpath);
         }
@@ -28,8 +33,10 @@ export class ConfigFile<T = any> {
         if(!fs.existsSync(this.path)) {
             return this.save();
         }
-
+    
         this.data = yaml.parse(fs.readFileSync(this.path).toString('utf-8'),  { schema: 'failsafe' });
+
+        this.emit("load", this);
 
     }
 
@@ -44,6 +51,20 @@ export class ConfigFile<T = any> {
         }
 
         fs.writeFileSync(this.path, yaml.stringify(this.data), 'utf-8');
+        this.emit("updated", this);
+    }  
+
+    setData(data:Partial<T>) {
+
+        if(JSON.stringify(data) == "{}") {
+            this.data = {} as any;
+            this.save();
+            return;
+        }
+
+        Object.assign(this.data, data);
+
+        this.save();
 
     }
 

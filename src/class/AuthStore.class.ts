@@ -3,7 +3,10 @@ import { ConfigFile } from "./ConfigFile.class";
 
 import path from 'path';
 import os from 'os';
-import { getAccessTokenByCode, getCurrentUser, getAccessTokenByRefreshToken } from "../api/auth.service";
+import { getAccessTokenByCode, getCurrentUser, getAccessTokenByRefreshToken, revokeToken } from "../api/auth.service";
+import ClassEvents from "./ClassEvent.class";
+
+// export type AuthStoreEvents = ();
 
 export default class AuthStore extends ConfigFile<TokenStoreI> {
 
@@ -11,14 +14,6 @@ export default class AuthStore extends ConfigFile<TokenStoreI> {
 
     constructor() {
         super(path.join(os.homedir(), ".config", "auth.yml"), {});
-    }
-
-    setData(data:Partial<TokenStoreI>) {
-
-        Object.assign(this.data, data);
-
-        this.save();
-
     }
 
     async getCurrentUser() {
@@ -36,7 +31,6 @@ export default class AuthStore extends ConfigFile<TokenStoreI> {
     async login(code:string) {
 
         const {error, data, res} = await getAccessTokenByCode(code);
-
         if(!error) {
 
             let accessToken = data.access_token,
@@ -69,6 +63,27 @@ export default class AuthStore extends ConfigFile<TokenStoreI> {
 
         }
         throw "internal_error";
+    }
+
+    async logout() {
+
+        const cred = await this.getCredentials();
+
+        if(!cred) throw "cant_you_dont_have_session";
+
+        const {error, data} = await revokeToken(cred.access_token);
+        
+        if(!error) {
+            this.clear();
+            return true;
+        }
+        
+        throw "cant_revoke";
+        
+    }
+
+    private clear() {
+        this.setData({});
     }
 
     tokenExpired() {
@@ -108,6 +123,10 @@ export default class AuthStore extends ConfigFile<TokenStoreI> {
 
         return this.data;
 
+    }
+
+    haveCredentials() {
+        return !!this.data.refresh_token;
     }
 
     static getInstance() {

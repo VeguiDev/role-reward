@@ -1,5 +1,5 @@
 import axios from "axios";
-import { RedemptionStatus, RewardRedemption } from "../interfaces/TwtichRedemption.interface";
+import { RedemptionStatus, RewardI, RewardRedemption } from "../interfaces/TwtichRedemption.interface";
 import { HelixApiClient as apiClient, HelixApiClient } from "./helixApiClient";
 import { ResponseWrapper } from "./lib/ResponseWreapper.lib";
 
@@ -28,7 +28,7 @@ export async function GetChannelReward(user_id:number, reward_id:string) {
 
 }
 
-export async function GetChannelRewardRedemption(broadcaster_id:string, reward_id:string, status:RedemptionStatus = "UNFULFILLED", redemption_id?:string) {
+export async function GetChannelRewardRedemption(broadcaster_id:number, reward_id:string, status:RedemptionStatus = "UNFULFILLED", redemption_id?:string) {
     
     return await ResponseWrapper<{
         data: RewardRedemption[]
@@ -45,7 +45,7 @@ export async function GetChannelRewardRedemption(broadcaster_id:string, reward_i
 
 }
 
-export async function SetChannelRewardRedemptionStatus(broadcaster_id:string, reward_id:string, redemption_id:string, status:RedemptionStatus) {
+export async function SetChannelRewardRedemptionStatus(broadcaster_id:number, reward_id:string, redemption_id:string, status:RedemptionStatus) {
     
     return await ResponseWrapper<{
         data: RewardRedemption[]
@@ -59,6 +59,24 @@ export async function SetChannelRewardRedemptionStatus(broadcaster_id:string, re
         },
         data: {
             status
+        }
+    }))
+
+}
+
+export async function CreateChannelReward(broadcaster_id:number, reward:Partial<Omit<RewardI, "is_user_input_required">>) {
+    
+    return await ResponseWrapper<{
+        data: RewardRedemption[]
+    }>(apiClient({
+        url: "channel_points/custom_rewards",
+        method: "POST",
+        params: {
+            broadcaster_id: broadcaster_id
+        },
+        data: {
+            is_user_input_required: true,
+            ...reward
         }
     }))
 

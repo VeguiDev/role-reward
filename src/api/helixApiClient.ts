@@ -6,7 +6,8 @@ export const HelixApiClient = axios.create({
     baseURL: "https://api.twitch.tv/helix",
     headers: {
         "Content-Type": "application/json"
-    }
+    },
+    validateStatus: (status) => status >= 200 && status < 300
 })
 
 HelixApiClient.interceptors.request.use(async function(config) {

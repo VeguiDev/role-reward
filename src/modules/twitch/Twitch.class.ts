@@ -1,6 +1,10 @@
 import { client as WebSocketClient, Message } from 'websocket';
 import { EventSubSubscribe } from '../../api/eventSub.service';
+import { GetChannelRewardRedemption } from '../../api/users.service';
+import { ActionConfig } from '../../class/Action.class';
+import AuthStore from '../../class/AuthStore.class';
 import ClassEvents from '../../class/ClassEvent.class';
+import { RewardRedemption } from '../../interfaces/TwtichRedemption.interface';
 import { Reward } from './class/Reward.class';
 
 export type TwitchModuleEvents = ("subscribed"|"reward_redemption_add");
@@ -23,9 +27,10 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
             const reward = new Reward({
                 user_id: data.event.user_id,
                 name: data.event.user_login
-            }, data.event.reward.id, data.event.id, data.event.broadcaster_id);
+            }, data.event.reward.id, data.event.id, data.event.broadcaster_user_id);
 
             reward.apply(data.event.user_input);
+            console.log(reward);
 
         }
 
@@ -65,9 +70,11 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
             }
 
         } else if(data.metadata.message_type == "session_reconnect") {
-            await this.reconnect(data.event.session.reconnect_url);
+            await this.reconnect(data.payload.session.reconnect_url);
         } else if(data.metadata.message_type == 'notification') {
             return this.processNotification(data.payload);
+        } else if(data.metadata.message_type == "session_keepalive") {
+            return;
         }
 
         console.log(data);
@@ -102,8 +109,11 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
             connection.on('error', function (error) {
                 console.log('Connection Error: ' + error.toString());
             });
-            connection.on('close', function () {
-                console.log('echo-protocol Connection Closed');
+            connection.on('close', () => {
+                console.log('Connection closed reconnecting!');;
+                if(!this.is_reconnecting) {
+                    this.listen();
+                }
             });
             connection.on('message', (message) => {
                 if (message.type === 'utf8') {
@@ -118,6 +128,49 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
         });
 
         this.client.connect(reconnect_url || 'wss://eventsub-beta.wss.twitch.tv/ws');
+    }
+
+    private async checkUnFinished() {
+        const actions = new ActionConfig().actions;
+
+        const credentials = await AuthStore.getInstance().getCredentials();
+
+        if(!credentials) return;
+        
+        actions.forEach(async (action) => {
+            
+            const {error, data, res} = await GetChannelRewardRedemption(credentials.user.user_id, action.on);
+            
+            if(error) return console.error("We cannot obtain all redemptions that have not been applied.");
+            
+            const redemptions:RewardRedemption[] = data.data;
+            console.log(redemptions);
+            console.log("Found "+redemptions.length+" unredeemed rewards.")
+
+            redemptions.forEach(async (redemption) => {
+
+                const reward = new Reward({
+                    user_id: redemption.user_id,
+                    name: redemption.user_login
+                }, redemption.reward.id, redemption.id, redemption.broadcaster_id);
+
+                await reward.apply(redemption.user_input);
+
+            })
+
+        })
+
+    }
+
+    async start() {
+        const cred = await AuthStore.getInstance().getCredentials();
+
+        if(!cred) {
+            return console.log("Can't use Twitch module if you not logged in!");
+        }
+
+        this.listen();
+        this.checkUnFinished();
     }
 
     static getInstance() {

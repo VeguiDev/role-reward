@@ -1,0 +1,1 @@
+export type AllKeys<T> = T extends any ? keyof T : never;

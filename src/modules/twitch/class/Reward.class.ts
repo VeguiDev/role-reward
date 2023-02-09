@@ -11,9 +11,9 @@ export class Reward {
     reward_id:string;
 
     redemption_id:string;
-    broadcaster_id:string;
+    broadcaster_id:number;
 
-    constructor(user:TwitchUserI, reward_id:string, redemption_id:string, broadcaster_id:string) {
+    constructor(user:TwitchUserI, reward_id:string, redemption_id:string, broadcaster_id:number) {
         this.twitch_data = user;
         this.reward_id = reward_id;
         this.redemption_id = redemption_id;
@@ -27,15 +27,15 @@ export class Reward {
     private async completed() {
 
         const {error} = await SetChannelRewardRedemptionStatus(this.broadcaster_id, this.reward_id, this.redemption_id, "FULFILLED");
-
+        console.log(error);
         return !error;
 
     }
 
     private async cancel() {
         const {error} = await SetChannelRewardRedemptionStatus(this.broadcaster_id, this.reward_id, this.redemption_id, "CANCELED");
-
-        return !error;
+        console.log(error);
+        return !error; 
     }
 
     async apply(usertag:string) {
@@ -45,7 +45,7 @@ export class Reward {
         if(!this.isRegistered() || !action) return;
 
         const discordModule = DiscordModule.getInstance();
-
+        
         const member = await discordModule.getMemberByTag(usertag);
 
         if(!member) return console.log(usertag, " Not found in the guild!");
