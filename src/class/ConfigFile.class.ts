@@ -10,6 +10,10 @@ export class ConfigFile<T = any> {
     data:T;
 
     constructor(fpath:string, data:any = {}) {
+        if(!path.isAbsolute(fpath)) {
+            fpath = path.resolve(__dirname, fpath);
+        }
+
         this.path = fpath;
 
         this.dirpath = path.dirname(fpath);
@@ -25,7 +29,7 @@ export class ConfigFile<T = any> {
             return this.save();
         }
 
-        this.data = yaml.parse(fs.readFileSync(this.path).toString());
+        this.data = yaml.parse(fs.readFileSync(this.path).toString('utf-8'),  { schema: 'failsafe' });
 
     }
 
@@ -39,7 +43,7 @@ export class ConfigFile<T = any> {
             fs.mkdirSync(this.dirpath, {recursive: true});
         }
 
-        fs.writeFileSync(this.path, yaml.stringify(this.data));
+        fs.writeFileSync(this.path, yaml.stringify(this.data), 'utf-8');
 
     }
 
