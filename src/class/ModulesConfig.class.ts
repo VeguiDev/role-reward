@@ -9,6 +9,9 @@ export default class ModulesConfigC extends ConfigFile<ModulesConfigI> {
     constructor(default_config:any = {
         webserver: {
             enabled: true
+        },
+        discord: {
+            enabled: true
         }
     }) {
         super(path.join("..", "..", "config", "modules.yml"), default_config);
