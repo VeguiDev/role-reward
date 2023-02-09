@@ -1,6 +1,22 @@
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 
-export async function ResponseWrapper(request:Promise<AxiosResponse>) {
+export interface SuccessResponse<T extends any> {
+
+    error:null;
+    data: T;
+    res:AxiosResponse<T>;
+
+}
+
+export interface ErrorResponse {
+    error:any;
+    data:any|null;
+    res:AxiosResponse|null;
+}
+
+export type Responses<T> = SuccessResponse<T>|ErrorResponse;
+
+export async function ResponseWrapper<T extends any>(request:Promise<AxiosResponse>):Promise<Responses<T>> {
     try {
         const res = await request;
 
