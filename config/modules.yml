@@ -1,0 +1,6 @@
+webserver:
+  enabled: true
+discord:
+  enabled: true
+twitch:
+  enabled: true
