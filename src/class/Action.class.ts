@@ -1,7 +1,10 @@
 import { ConfigFile } from "./ConfigFile.class";
 import os from 'os';
 import path from 'path';
+import { AxiosRequestConfig } from "axios";
 
+
+export type ActionRewardType = ("DISCORD_ROLE"|"FETCH");
 
 export interface Action {
 
@@ -26,9 +29,7 @@ export interface ActionRewardDiscordI {
 export interface ActionRewardFetchI {
 
     type:"FETCH";
-    headers:{
-        [header:string]: string
-    };
+    config:AxiosRequestConfig;
 
 }
 
@@ -66,6 +67,27 @@ export class ActionConfig extends ConfigFile<ActionFile> {
 
 }
 
+export class Action {
+
+    on:string;
+    rewards:ActionReward[];
+
+    constructor(
+        on:string,
+        rewards:ActionReward[]
+    ) {
+        this.on = on;
+        this.rewards = rewards.map(reward => {
+            if(reward instanceof ActionReward) {
+                return reward;
+            }
+
+            return new ActionReward(reward);
+        });
+    }
+
+}
+
 export class ActionReward {
 
     data:ActionRewardI;
@@ -75,6 +97,36 @@ export class ActionReward {
     ) {
 
         this.data = data;
+
+    }
+
+    get details() {
+
+        const {type, ...rest} = this.data;
+
+        return rest;
+
+    }
+
+    get roles() {
+
+        if(this.data.type != "DISCORD_ROLE") return null;;
+
+        return this.data.roles;
+
+    }
+
+    get config() {
+
+        if(this.data.type != "FETCH") return null;
+
+        return this.data.config;
+
+    }
+
+    get type() {
+
+        return this.data.type;
 
     }
 
