@@ -26,19 +26,21 @@ app.get('/actions', async (req, res) => {
 
 app.post('/actions', async (req,res) => {
 
-    if(!req.body.roles) {
+    const {action_trigger, reward} = req.body;
+
+    if(!action_trigger || !reward) {
         res.status(400).json({
             status: 400,
-            error:"not_found_in_body::roles"
+            error:"invalid::body"
         });
         return;
     }
 
     try {
 
-        const reward = await homeService.createAction(req.body.reward, req.body.roles);
+        const action = await homeService.createAction(action_trigger, reward);
 
-        res.json(reward);
+        res.json(action);
 
     } catch(e) {
         console.error(e);
