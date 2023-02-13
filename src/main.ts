@@ -2,7 +2,6 @@ import { ModulesConfig } from './lib/modules.lib';
 import { WebServer } from './modules/webserver/WebServer.class';
 import dotenv from 'dotenv';
 import DiscordModule from './modules/discord/discord.class';
-import ModulesConfigC from './class/ModulesConfig.class';
 import TwitchModule from './modules/twitch/Twitch.class';
 import AuthStore from './class/AuthStore.class';
 
