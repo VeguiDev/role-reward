@@ -1,3 +1,4 @@
+import CLIModule from "../modules/cli/cli.class";
 import DiscordModule from "../modules/discord/discord.class";
 import TwitchModule from "../modules/twitch/Twitch.class";
 import { WebServer } from "../modules/webserver/WebServer.class";
@@ -12,6 +13,7 @@ export default class Application extends ClassEvents<string> {
     webserver:WebServer = new WebServer();
     discordModule:DiscordModule = DiscordModule.getInstance();
     twitchModule:TwitchModule = TwitchModule.getInstance();
+    cliModule:CLIModule = CLIModule.getInstance();
 
     constructor() {
         super();
@@ -69,6 +71,8 @@ export default class Application extends ClassEvents<string> {
         this.authStore.on("updated", () => {
             this.emit("reload");
         });
+
+        this.cliModule.start();
 
     }
 
