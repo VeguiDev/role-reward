@@ -1,6 +1,5 @@
 import { Router } from "express";
 import Application from "../../../class/Application.class";
-import { ModulesConfig } from "../../../lib/modules.lib";
 import HomeService from "../service/home.service";
 
 const app = Router();
@@ -12,12 +11,6 @@ app.get("/", (req, res) => {
     res.json({
         message: "Hello World"
     });
-
-});
-
-app.get("/modules", (req, res) => {
-
-    res.json(ModulesConfig);
 
 });
 
