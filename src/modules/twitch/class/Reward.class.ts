@@ -1,7 +1,9 @@
+import axios from "axios";
 import { SetChannelRewardRedemptionStatus } from "../../../api/users.service";
-import { ActionConfig } from "../../../class/Action.class";
+import { Action, ActionConfig, ActionReward, ActionRewardDiscordI } from "../../../class/Action.class";
 import TwitchUserI from "../../../interfaces/TwitchUser.interface";
 import DiscordModule from '../../discord/discord.class';
+import {replaceData} from '../../../api/lib/RequestDataReplacer.lib';
 
 const actionsConfig = new ActionConfig();
 
@@ -27,15 +29,70 @@ export class Reward {
     private async completed() {
 
         const {error} = await SetChannelRewardRedemptionStatus(this.broadcaster_id, this.reward_id, this.redemption_id, "FULFILLED");
-        console.log(error);
+        // console.log(error);
         return !error;
 
     }
 
     private async cancel() {
         const {error} = await SetChannelRewardRedemptionStatus(this.broadcaster_id, this.reward_id, this.redemption_id, "CANCELED");
-        console.log(error);
+        // console.log(error);
         return !error; 
+    }
+
+    private async applyDiscord(action:ActionReward, usertag:string) {
+
+        const roles = action.roles;
+
+        if(!roles) return;
+
+        const discordModule = DiscordModule.getInstance();
+        
+        const member = await discordModule.getMemberByTag(usertag);
+
+        if(!member) {
+            this.cancel();
+            return console.log(usertag, "Not found in the guild!")
+        }
+
+        if(member.roles.cache.hasAll(...roles)) {
+            await this.cancel();
+            console.log("The role cannot be applied to the user ("+this.twitch_data.name+") because they already have it.")
+            return false;
+        }
+
+        await member.roles.add(roles);
+
+        console.log("[REWARD]: Applying all roles for '"+this.twitch_data.name+" ("+this.twitch_data.user_id+")' in twitch");
+
+        return await this.completed();
+
+    }
+
+    private async makeFetch(reward:ActionReward, userinput:string) {
+        console.log("MAKING FETCH");
+        let config = reward.config;
+
+        if(!config) return;
+
+        config = await replaceData("BROADCASTER_ID", this.broadcaster_id, config);
+        config = await replaceData("REDEMPTION_ID", this.redemption_id, config);
+        config = await replaceData("REWARD_ID", this.reward_id, config);
+        config = await replaceData("USER_DATA", JSON.stringify(this.twitch_data), config);
+        config = await replaceData("USER_INPUT", userinput, config);
+
+        try {
+
+            const {status, data} = await axios({
+                ...config
+            });
+
+            this.completed();
+
+        } catch(e) {
+            console.error(e);
+            this.cancel();
+        }
     }
 
     async apply(usertag:string) {
@@ -44,23 +101,18 @@ export class Reward {
         
         if(!this.isRegistered() || !action) return;
 
-        const discordModule = DiscordModule.getInstance();
-        
-        const member = await discordModule.getMemberByTag(usertag);
+        action.rewards.forEach(reward => {
+            switch(reward.type) {
 
-        if(!member) return console.log(usertag, " Not found in the guild!");
+                case "DISCORD_ROLE":
+                    this.applyDiscord(reward, usertag);
+                    break;
+                case "FETCH":
+                    this.makeFetch(reward, usertag);
+                    break;
 
-        if(member.roles.cache.hasAll(...action.rewards)) {
-            await this.cancel();
-            console.log("The role cannot be applied to the user ("+this.twitch_data.name+") because they already have it.")
-            return false;
-        }
-
-        await member.roles.add(action.rewards);
-
-        console.log("[REWARD]: Applying all roles for '"+this.twitch_data.name+" ("+this.twitch_data.user_id+")' in twitch");
-
-        return await this.completed();
+            }
+        });
 
     }
 

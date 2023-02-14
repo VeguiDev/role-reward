@@ -1,5 +1,5 @@
 import { CreateChannelReward } from "../../../api/users.service";
-import { ActionConfig } from "../../../class/Action.class"
+import { ActionConfig, ActionReward, ActionRewardI, ActionRewardType } from "../../../class/Action.class"
 import AuthStore from "../../../class/AuthStore.class";
 import { RewardI } from "../../../interfaces/TwtichRedemption.interface";
 
@@ -14,7 +14,7 @@ export default class HomeService {
 
     }
 
-    async createAction(rawReward:Partial<RewardI>, roles:string[]) {
+    async createAction(rawReward:Partial<RewardI>, actionReward:ActionRewardI) {
         console.log(rawReward);
         const cred = await AuthStore.getInstance().getCredentials();
 
@@ -30,7 +30,7 @@ export default class HomeService {
 
         console.log(reward);
 
-        return new ActionConfig().addAction(reward.id, roles);
+        return new ActionConfig().addAction(reward.id, actionReward);
 
     }
 

@@ -9,6 +9,7 @@ export default class DiscordModule {
 
     private bot_token?:string = process.env.DISCORD_BOT_TOKEN;
     private initialized:boolean = false;
+    private started:boolean = false;
 
     client:Client;
 
@@ -32,11 +33,22 @@ export default class DiscordModule {
     async close() {
         this.initialized = false;
         return this.client.destroy();
+    } 
+
+    status() {
+
+        return {
+            discord: {
+                display: "Discord Module",
+                status: this.started
+            }
+        };
+
     }
 
     private events() {
         this.client.on("ready", (client) => {
-            
+            this.started = true;
             let guild = client.guilds.cache.find(guild => this.guild_id == guild.id);
 
             if(!guild) {
@@ -47,10 +59,11 @@ export default class DiscordModule {
             console.log("[DISCORD]: Successfully logged in as "+client.user.username+` (${client.user.id}) working for the guild ${guild.name} (${guild.id})`);
 
         });
-
     }
 
     async start() {
+
+        if(this.initialized) return;
 
         if(!this.bot_token) return console.log("You have not configured the discord module, it has skipped its start. Read the documentation.");
 
