@@ -51,8 +51,8 @@ export class WebServer {
         let twitch = TwitchModule.getInstance();
 
         return {
+            display: "WebServer",
             webserver: {
-
                 discord: {
                     display: "Discord Endpoint",
                     status: discord.status().discord.status
