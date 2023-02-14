@@ -1,4 +1,5 @@
 import { Router } from "express";
+import Application from "../../../class/Application.class";
 import { ModulesConfig } from "../../../lib/modules.lib";
 import HomeService from "../service/home.service";
 
@@ -59,6 +60,12 @@ app.post('/actions', async (req,res) => {
             });
         }
     }
+
+});
+
+app.get("/status", (req,res) => {
+
+    res.json(Application.getInstance().status())
 
 });
 
