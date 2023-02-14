@@ -20,6 +20,8 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
     is_reconnecting:boolean = false;
     reconnect_url:string = "";
 
+    started:boolean = false;
+
     private async processNotification(data:any) {
         console.log(data);
         if(data.subscription.type == "channel.channel_points_custom_reward_redemption.add") {
@@ -162,7 +164,19 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
 
     }
 
+    status() {
+        return {
+            twitch: {
+                display: "Twitch Module",
+                status: this.started
+            }
+        };
+    }
+
     async start() {
+
+        if(this.started) return;
+        this.started = true;
         const cred = await AuthStore.getInstance().getCredentials();
 
         if(!cred) {
