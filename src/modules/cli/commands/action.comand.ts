@@ -210,6 +210,31 @@ export default class ActionCommand {
         }
     }
 
+    async getAction(args:string[]) {
+
+        if(args.length <= 2) {
+            console.log(
+                chalk.redBright(`Invalid syntax`)
+            );
+
+            console.log(
+                chalk.redBright(`action get <id>`)
+            );
+            return false;
+        }
+
+        let actions = await this.homeService.getActions();
+
+        let action = actions.find(action => action.on == args[2]);
+
+        if(!action) {
+            return console.error(chalk.redBright("Action not found!"));
+        }
+
+        console.log(prettyjson.render(action));
+
+    }
+
     async cmd(command:string) {
 
         let args = command.split(" ");
@@ -223,6 +248,9 @@ export default class ActionCommand {
                 return await this.list();
             case "create":
                 return await this.create();
+            case "get":
+            case "find":
+                return await this.getAction(args);
             default:
                 console.error(this.help());
                 break;
