@@ -14,7 +14,7 @@ export default class HomeService {
 
     }
 
-    async createAction(rawReward:Partial<RewardI>, actionReward:ActionRewardI) {
+    async createAction(rawReward:Partial<RewardI>, actionReward:ActionRewardI|ActionRewardI[]) {
         console.log(rawReward);
         const cred = await AuthStore.getInstance().getCredentials();
 
