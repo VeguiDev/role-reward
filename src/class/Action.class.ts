@@ -51,13 +51,21 @@ export class ActionConfig extends ConfigFile<ActionFile> {
         return this.data.actions.find(action => action.on == reward_id);
     }
 
-    addAction(reward_id:string, data:ActionRewardI) {
+    addAction(reward_id:string, data:ActionRewardI|ActionRewardI[]) {
+
+        let rewards:ActionReward[] = [];
+
+        if(!Array.isArray(data)) {
+            rewards = [new ActionReward(data)];
+        } else {
+            rewards = data.map(reward => {
+                return new ActionReward(reward)
+            })
+        }
 
         let newReward = {
             on: reward_id,
-            rewards: [
-                new ActionReward(data)
-            ]
+            rewards
         };
 
         this.data.actions.push(newReward);
