@@ -1,6 +1,7 @@
 import inquirer from 'inquirer';
 import { StatusCommand } from './commands/status.command';
 import chalk from 'chalk';
+import ActionCommand from './commands/action.comand';
 
 export default class CLIModule {
     private static instance: CLIModule;
@@ -16,10 +17,17 @@ export default class CLIModule {
     }
 
     private async command(command: string) {
+        console.log("RAW COMMAND:", command);
         command = command.trim();
 
-        if (command.startsWith('status')) {
-            StatusCommand(command);
+        const commandParts = command.split(" ");
+
+        const cmdName = commandParts[0].toLowerCase();
+
+        if (commandParts[0] == "status") {
+            await StatusCommand(command);
+        } else if(cmdName == "action" || cmdName == "actions") {
+            await new ActionCommand().cmd(command);
         } else if(command.length > 0) {
             let fristPart = command.split(' ')[0];
 
