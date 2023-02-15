@@ -86,7 +86,7 @@ export default class DiscordModule {
 
         if(!guild) throw "cant_get::guild";
 
-        return guild.roles.cache.filter(role => !role.managed);
+        return guild.roles.cache.filter(role => !role.managed && role.name != "@everyone");
 
     }
 
