@@ -73,6 +73,21 @@ export class ActionConfig extends ConfigFile<ActionFile> {
         return newReward;
     }
 
+    async removeAction(id:string) {
+
+        let action = this.data.actions.findIndex(act => act.on == id);
+
+        if(action == -1) {
+            return false;
+        }
+
+        this.data.actions.splice(action, 1);
+        this.save();
+        
+        return true;
+
+    }
+
 }
 
 export class Action {
