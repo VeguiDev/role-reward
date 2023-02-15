@@ -81,3 +81,36 @@ export async function CreateChannelReward(broadcaster_id:number, reward:Partial<
     }))
 
 }
+
+export async function UpdateChannelReward(broadcaster_id:number, reward_id:string, reward:Partial<RewardI>) {
+    
+    return await ResponseWrapper<{
+        data: RewardRedemption[]
+    }>(apiClient({
+        url: "channel_points/custom_rewards",
+        method: "PATCH",
+        params: {
+            broadcaster_id: broadcaster_id,
+            id: reward_id
+        },
+        data: {
+            ...reward
+        }
+    }))
+
+}
+
+export async function DeleteChannelReward(broadcaster_id:number, reward_id:string) {
+    
+    return await ResponseWrapper<{
+        data: RewardRedemption[]
+    }>(apiClient({
+        url: "channel_points/custom_rewards",
+        method: "DELETE",
+        params: {
+            broadcaster_id: broadcaster_id,
+            id: reward_id
+        }
+    }))
+
+}
