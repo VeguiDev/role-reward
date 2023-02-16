@@ -37,6 +37,8 @@ export type ActionRewardI = (ActionRewardDiscordI|ActionRewardFetchI);
 
 export class ActionConfig extends ConfigFile<ActionFile> {
 
+    private static instance:ActionConfig;
+
     constructor(default_config:{
         actions: Action[]
     } = {actions: []}) {
@@ -85,6 +87,18 @@ export class ActionConfig extends ConfigFile<ActionFile> {
         this.save();
         
         return true;
+
+    }
+    
+    static getInstance() {
+
+        if(!this.instance) {
+
+            this.instance = new ActionConfig();
+
+        }
+
+        return this.instance;
 
     }
 
