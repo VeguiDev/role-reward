@@ -1,3 +1,4 @@
+import chalk from 'chalk';
 import express from 'express';
 import morgan from 'morgan';
 import DiscordModule from '../discord/discord.class';
@@ -75,14 +76,25 @@ export class WebServer {
 
     }
 
+    log(...msg:any) {
+
+        console.log(`${chalk.cyan(`[${chalk.cyanBright("WEBSERVER")}]`)}`, ...msg);
+
+    }
+
     listen() {
 
-        if(this.started) return;
-        this.started = true;
+        return new Promise((resolve) => {
 
-        this.app.listen(this.app.get("port"), () => {
-            console.log("Server listening on port "+this.app.get("port"));
-        });
+            if(this.started) return resolve(false);
+            this.started = true;
+
+            this.app.listen(this.app.get("port"), () => {
+                this.log("Server listening on port "+this.app.get("port"));
+                resolve(true);
+            });
+
+        })
 
     }
 

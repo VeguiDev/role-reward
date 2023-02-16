@@ -1,3 +1,4 @@
+import chalk from "chalk";
 import { Client, GatewayIntentBits } from "discord.js";
 
 export default class DiscordModule {
@@ -30,9 +31,19 @@ export default class DiscordModule {
         return this.initialized;
     }
 
+    log(...msg:any) {
+        console.log(chalk.blue("["+chalk.blueBright("DISCORD")+"]"), ...msg);
+    }
+
     async close() {
+
+        this.log("Disconnecting!");
+
         this.initialized = false;
-        return this.client.destroy();
+        await this.client.destroy()
+        let {client} = new DiscordModule();
+        this.client = client;
+        return true;
     } 
 
     status() {
@@ -53,10 +64,10 @@ export default class DiscordModule {
 
             if(!guild) {
                 this.close();
-                return console.log("[DISCORD]: You must specify a guild in the configuration. Read the documentation.")
+                return this.log("You must specify a guild in the configuration. Read the documentation.")
             }
 
-            console.log("[DISCORD]: Successfully logged in as "+client.user.username+` (${client.user.id}) working for the guild ${guild.name} (${guild.id})`);
+            this.log("Successfully logged in as "+client.user.username+` (${client.user.id}) working for the guild ${guild.name} (${guild.id})`);
 
         });
     }
@@ -65,7 +76,7 @@ export default class DiscordModule {
 
         if(this.initialized) return;
 
-        if(!this.bot_token) return console.log("You have not configured the discord module, it has skipped its start. Read the documentation.");
+        if(!this.bot_token) return this.log("You have not configured the discord module, it has skipped its start. Read the documentation.");
 
         await this.client.login(this.bot_token);
         this.initialized = true;
@@ -124,4 +135,4 @@ export default class DiscordModule {
         return this.instance;
     }
 
-}
+}  
