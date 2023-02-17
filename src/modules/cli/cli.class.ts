@@ -4,6 +4,7 @@ import chalk from 'chalk';
 import ActionCommand from './commands/action.comand';
 import DisconnectCommand from './commands/disconnect.command';
 import Application from '../../class/Application.class';
+import LoginCommand from './commands/login.command';
 
 export default class CLIModule {
     private static instance: CLIModule;
@@ -43,6 +44,12 @@ export default class CLIModule {
             await Application.getInstance().saveAll();
         } else if(cmdName == "reconnect") {
             await Application.getInstance().reconnect();
+        } else if(cmdName == "login") {
+            await new LoginCommand().cmd(command);
+        } else if(cmdName == "scopes") {
+            new LoginCommand().scopes();
+        } else if(cmdName == "logout") {
+            await new LoginCommand().logout();
         } else if(command.length > 0) {
             let fristPart = command.split(' ')[0];
 
