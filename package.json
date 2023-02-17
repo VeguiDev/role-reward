@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "jest .",
-    "dev": "nodemon ./src/main.ts"
+    "dev": "nodemon ./src/main.ts",
+    "dev:debug": "nodemon ./src/main.ts --debug"
   },
   "repository": {
     "type": "git",

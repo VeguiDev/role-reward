@@ -6,9 +6,9 @@ import os from 'os';
 import { getAccessTokenByCode, getCurrentUser, getAccessTokenByRefreshToken, revokeToken } from "../api/auth.service";
 import ClassEvents from "./ClassEvent.class";
 
-// export type AuthStoreEvents = ();
+export type AuthStoreEvents = ("login"|"logout"|"refresh");
 
-export default class AuthStore extends ConfigFile<TokenStoreI> {
+export default class AuthStore extends ConfigFile<TokenStoreI, AuthStoreEvents> {
 
     private static instance:AuthStore;
 
@@ -51,6 +51,8 @@ export default class AuthStore extends ConfigFile<TokenStoreI> {
                 user
             });
 
+            this.emit("login", this);
+
             return {
                 user
             }
@@ -75,6 +77,7 @@ export default class AuthStore extends ConfigFile<TokenStoreI> {
         
         if(!error) {
             this.clear();
+            this.emit("logout", this);
             return true;
         }
         
@@ -105,11 +108,27 @@ export default class AuthStore extends ConfigFile<TokenStoreI> {
                 access_token: data.access_token,
                 expires_at: Date.now() + data.expires_in
             });
+
+            if(!this.data.user) {
+                let user = await this.getCurrentUser();
+
+                if(!user) {
+                    this.clear();
+                    this.emit("logout", this);
+                    return null;
+                }
+
+                this.setData({
+                    user: user
+                })
+            }
+
+            this.emit("refresh", this);
             return data;
         }
 
         this.setData({});
-
+        this.emit("logout", this);
         return false;
 
     }

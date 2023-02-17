@@ -20,10 +20,6 @@ export default class Application extends ClassEvents<string> {
 
     constructor() {
         super();
-
-        this.on('reload', () => {
-            this.setupTwitch();
-        });
     }
 
     status() {

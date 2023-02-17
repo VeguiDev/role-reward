@@ -97,6 +97,7 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
     }
 
     async listen(reconnect_url?:string) {
+        console.log("Con");
         if(reconnect_url) {
             this.old_client = this.client;
             this.client = new WebSocketClient();
@@ -111,7 +112,8 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
             connection.on('error', function (error) {
                 console.log(chalk.redBright('Connection Error: ' + error.toString()));
             });
-            connection.on('close', () => {
+            connection.on('close', (code, desc) => {
+                console.log(code, desc);
                 this.log('Connection closed reconnecting!');;
                 if(!this.is_reconnecting) {
                     this.listen();
@@ -183,6 +185,11 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
         if(!cred) {
             return this.log(chalk.redBright("Can't use Twitch module if you not logged in!"));
         }
+        
+        AuthStore.getInstance().on("logout", () => {
+            this.log(chalk.yellow("Logout event detected, disconnecting!"));
+            this.disconnect();
+        });
 
         this.listen();
         this.checkUnFinished();
