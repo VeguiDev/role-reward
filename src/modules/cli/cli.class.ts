@@ -6,6 +6,7 @@ import DisconnectCommand from './commands/disconnect.command';
 import Application from '../../class/Application.class';
 import LoginCommand from './commands/login.command';
 import { ReconnectCommand } from './commands/reconnect.command';
+import HelpCommand from './commands/help.command';
 
 export default class CLIModule {
     private static instance: CLIModule;
@@ -51,6 +52,8 @@ export default class CLIModule {
             new LoginCommand().scopes();
         } else if(cmdName == "logout") {
             await new LoginCommand().logout();
+        } else if(cmdName == "help") {
+            new HelpCommand(command);
         } else if(command.length > 0) {
             let fristPart = command.split(' ')[0];
 
