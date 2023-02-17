@@ -59,12 +59,12 @@ export function StatusForConsole(data: any, jumps: number = 0): string {
     for (let module of modules) {
         let mod = data[module];
 
-        if (mod.status) {
+        if (typeof mod.status != 'undefined') {
             let displayName = module;
 
             if (mod.display) displayName = mod.display;
 
-            lines.push(`${spaces}${chalk.green("-")} ${displayName} ${mod.status ? chalk.green("•") : chalk.redBright("•")}`);
+            lines.push(`${spaces}${chalk.green("-")} ${displayName} ${mod.status ? chalk.green("●") : chalk.redBright("●")}`);
         } else {
             let modContents = Object.keys(mod);
             let childrenJumps = jumps;

@@ -90,6 +90,8 @@ export default class Application extends ClassEvents<string> {
             await this.cliModule.start();
         }
 
+        this.disconnected = false;
+
         return true;
     }
 

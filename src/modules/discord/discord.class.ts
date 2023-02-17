@@ -37,13 +37,14 @@ export default class DiscordModule {
 
     async close() {
 
-        this.log("Disconnecting!");
+        this.log("Disconnecting discord bot.");
 
         this.initialized = false;
         await this.client.destroy()
         let {client} = new DiscordModule();
         this.client = client;
         return true;
+
     } 
 
     status() {
@@ -51,7 +52,7 @@ export default class DiscordModule {
         return {
             discord: {
                 display: "Discord Module",
-                status: this.started
+                status: this.initialized
             }
         };
 
