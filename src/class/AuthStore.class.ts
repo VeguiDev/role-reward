@@ -31,6 +31,7 @@ export default class AuthStore extends ConfigFile<TokenStoreI, AuthStoreEvents> 
     async login(code:string) {
 
         const {error, data, res} = await getAccessTokenByCode(code);
+        
         if(!error) {
 
             let accessToken = data.access_token,

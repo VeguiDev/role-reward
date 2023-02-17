@@ -37,14 +37,14 @@ app.get("/oauth", async (req, r) => {
     } catch (error) {
 
         if(error == "invalid_code") {
-            r.json({
+            r.status(400).json({
                 error: "invalid::code",
                 message: "The provided code is invalid!"
             });
             return;
         }
 
-        r.json({
+        r.status(500).json({
             error: "cant_complete::login",
             message: "Can't complete the login process"
         })

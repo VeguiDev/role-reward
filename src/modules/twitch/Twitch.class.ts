@@ -96,8 +96,9 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
 
     }
 
+    try_reconnect:boolean = false;
+
     async listen(reconnect_url?:string) {
-        console.log("Con");
         if(reconnect_url) {
             this.old_client = this.client;
             this.client = new WebSocketClient();
@@ -108,6 +109,7 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
         });
 
         this.client.on('connect', (connection) => {
+            this.try_reconnect = false;
             this.log('WebSocket Client Connected');
             connection.on('error', function (error) {
                 console.log(chalk.redBright('Connection Error: ' + error.toString()));
@@ -116,7 +118,7 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
                 console.log(code, desc);
                 this.log('Connection closed reconnecting!');;
                 if(!this.is_reconnecting) {
-                    this.listen();
+                    this.try_reconnect = true;
                 }
             });
             connection.on('message', (message) => {
@@ -190,6 +192,21 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
             this.log(chalk.yellow("Logout event detected, disconnecting!"));
             this.disconnect();
         });
+
+        AuthStore.getInstance().on("login", () => {
+            this.log(chalk.yellow("Logout event detected, connecting!"));
+            this.listen();
+            this.checkUnFinished();
+        });
+
+        setInterval(() => {
+            if(this.try_reconnect) {
+
+                this.log(chalk.yellow("Connecting, trying every 5 seconds!"));
+                this.listen();
+
+            }
+        }, 5000);
 
         this.listen();
         this.checkUnFinished();
