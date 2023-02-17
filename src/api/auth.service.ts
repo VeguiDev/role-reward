@@ -9,6 +9,8 @@ const apiClient = axios.create({
     }
 });
 
+export const TokenScopes = ["channel:manage:redemptions", "moderator:manage:chat_messages", "user:read:email", "chat:read"];
+
 export function getAuthorizeUrl() {
     let query = new URLSearchParams();
 
@@ -16,7 +18,7 @@ export function getAuthorizeUrl() {
     query.set('client_id', process.env.CLIENT_ID as string);
     query.set(
         'scope',
-        'channel:manage:redemptions moderator:manage:banned_users moderator:manage:chat_messages user:read:email chat:read whispers:edit'
+        TokenScopes.join(" ")
     );
     query.set('redirect_uri', 'http://localhost:4000/auth/oauth');
 
