@@ -140,6 +140,7 @@ export default class TwitchEventSub extends ClassEvents<string> {
         });
 
         this.client.on('error', (error) => {
+            console.log(error);
             if(this.is_reconnecting && this.try_reconnect) {
                 this.try_reconnect = false;
             }
