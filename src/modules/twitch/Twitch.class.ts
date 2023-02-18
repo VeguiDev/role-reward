@@ -1,4 +1,5 @@
 import chalk from 'chalk';
+import { CronJob } from 'cron';
 import { EventSubSubscribe } from '../../api/eventSub.service';
 import { GetChannelRewardRedemption } from '../../api/users.service';
 import { ActionConfig } from '../../class/Action.class';
@@ -16,6 +17,17 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
     eventsub:TwitchEventSub = new TwitchEventSub(this);
 
     started:boolean = false;
+
+    job:CronJob = new CronJob(
+        "* */30 * * * *", function() {
+            const twitchMod = TwitchModule.getInstance();
+
+            if(twitchMod && twitchMod.started) {
+
+                twitchMod.checkRedemptionNotFinished();
+
+            }
+        })
 
     async subscribeEvent(session_id:string) {
         const {error, data} = await EventSubSubscribe("channel.channel_points_custom_reward_redemption.add", session_id);
@@ -71,6 +83,20 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
         };
     }
 
+    private startCronJobs() {
+
+        this.log("Starting cron jobs.");
+        this.job.start();
+
+    }
+    
+    private stopCronJobs() {
+
+        this.log("Stopping cron jobs.");
+        this.job.stop();
+
+    }
+
     async start() {
 
         if(this.started) return;
@@ -95,6 +121,7 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
 
         this.eventsub.connect();
         this.checkRedemptionNotFinished();
+        this.startCronJobs();
     }
 
     log(...msg:any) {
@@ -106,6 +133,7 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
         this.started = false;
         this.log("Disconnecting from event sub!");
         this.eventsub.disconnect();
+        this.stopCronJobs();
         return true;
 
     }
