@@ -36,7 +36,9 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
         if(!credentials) return;
         
         actions.forEach(async (action) => {
-            
+
+            console.log(action);
+
             const {error, data, res} = await GetChannelRewardRedemption(credentials.user.user_id, action.on);
             
             if(error) return this.log(chalk.yellow("We cannot obtain all redemptions that have not been applied."));
@@ -92,6 +94,7 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
         });
 
         this.eventsub.connect();
+        this.checkRedemptionNotFinished();
     }
 
     log(...msg:any) {
