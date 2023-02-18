@@ -1,5 +1,4 @@
 import chalk from 'chalk';
-import { client as WebSocketClient, Message } from 'websocket';
 import { EventSubSubscribe } from '../../api/eventSub.service';
 import { GetChannelRewardRedemption } from '../../api/users.service';
 import { ActionConfig } from '../../class/Action.class';

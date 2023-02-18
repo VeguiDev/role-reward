@@ -56,7 +56,7 @@ app.get("/oauth", async (req, r) => {
     }
 });
 
-app.get("/logout", async (req, res) => {
+app.delete("/logout", async (req, res) => {
 
     const authStore = AuthStore.getInstance();
 
