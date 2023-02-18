@@ -12,7 +12,7 @@ export default class CLIModule {
     private static instance: CLIModule;
 
     private async command(command: string) {
-        console.log("RAW COMMAND:", command);
+        // console.log("RAW COMMAND:", command);
         command = command.trim();
 
         const commandParts = command.split(" ");
