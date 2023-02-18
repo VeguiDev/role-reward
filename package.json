@@ -6,7 +6,9 @@
   "scripts": {
     "test": "jest .",
     "dev": "nodemon ./src/main.ts",
-    "dev:debug": "nodemon ./src/main.ts --debug"
+    "dev:debug": "nodemon ./src/main.ts --debug",
+    "build": "tsc",
+    "dist": "node ./dist/main.js"
   },
   "repository": {
     "type": "git",
@@ -34,7 +36,6 @@
     "inquirer": "^8.2.5",
     "morgan": "^1.10.0",
     "prettyjson": "^1.2.5",
-    "websocket": "^1.0.34",
     "ws": "^8.12.1",
     "yaml": "^2.2.1"
   },
@@ -43,7 +44,6 @@
     "@types/inquirer": "^8.2.5",
     "@types/morgan": "^1.9.4",
     "@types/prettyjson": "^0.0.30",
-    "@types/websocket": "^1.0.5",
     "@types/ws": "^8.5.4",
     "nodemon": "^2.0.20",
     "ts-node": "^10.9.1",
