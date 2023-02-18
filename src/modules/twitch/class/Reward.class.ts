@@ -5,8 +5,6 @@ import TwitchUserI from "../../../interfaces/TwitchUser.interface";
 import DiscordModule from '../../discord/discord.class';
 import {replaceData} from '../../../api/lib/RequestDataReplacer.lib';
 
-const actionsConfig = new ActionConfig();
-
 export class Reward {
 
     twitch_data:TwitchUserI;
@@ -14,6 +12,7 @@ export class Reward {
 
     redemption_id:string;
     broadcaster_id:number;
+    actionsConfig:ActionConfig = ActionConfig.getInstance();
 
     constructor(user:TwitchUserI, reward_id:string, redemption_id:string, broadcaster_id:number) {
         this.twitch_data = user;
@@ -23,7 +22,7 @@ export class Reward {
     }
 
     isRegistered() {
-        return !!actionsConfig.find(this.reward_id);
+        return !!this.actionsConfig.find(this.reward_id);
     }
 
     private async completed() {
@@ -57,13 +56,13 @@ export class Reward {
 
         if(member.roles.cache.hasAll(...roles)) {
             await this.cancel();
-            console.log("The role cannot be applied to the user ("+this.twitch_data.name+") because they already have it.")
+            console.log("[REWARD] The role cannot be applied to the user ("+this.twitch_data.name+") because they already have it.")
             return false;
         }
 
         await member.roles.add(roles);
 
-        console.log("[REWARD]: Applying all roles for '"+this.twitch_data.name+" ("+this.twitch_data.user_id+")' in twitch");
+        console.log("[REWARD] Applying all roles for '"+this.twitch_data.name+" ("+this.twitch_data.user_id+")' in twitch");
 
         return await this.completed();
 
@@ -97,7 +96,7 @@ export class Reward {
 
     async apply(usertag:string) {
         
-        let action = actionsConfig.find(this.reward_id);
+        let action = this.actionsConfig.find(this.reward_id);
         
         if(!this.isRegistered() || !action) return;
 
