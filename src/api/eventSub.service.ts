@@ -22,3 +22,17 @@ export async function EventSubSubscribe(event:string, session_id:string) {
     )
 
 }
+
+export async function EventSubUnsubscribe(subscription_id:string) {
+
+    return await ResponseWrapper(
+        apiClient({
+            url: "eventsub/subscriptions",
+            method: "DELETE",
+            params: {
+                id: subscription_id
+            }
+        })
+    )
+
+}
