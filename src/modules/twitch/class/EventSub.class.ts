@@ -14,8 +14,6 @@ export default class TwitchEventSub extends ClassEvents<string> {
     connection_lost:boolean = false;
     connection_lost_timer:NodeJS.Timeout|null = null;
     connection_lost_tries:number = 0;
-
-    received_pong:boolean = true;
     
     is_disconnecting = false;
     connecting:boolean = false;
