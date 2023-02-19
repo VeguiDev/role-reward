@@ -1,3 +1,4 @@
+import chalk from 'chalk';
 import WebSocket from 'ws';
 import ClassEvents from '../../../class/ClassEvent.class';
 import TwitchModule from '../Twitch.class';
@@ -72,6 +73,11 @@ export default class TwitchEventSub extends ClassEvents<string> {
             await this.reconnect(data.payload.session.reconnect_url);
         } else if (data.metadata.message_type == 'notification') {
             return this.processNotification(data.payload);
+        } else if(data.metadata.message_type == 'revocation') {
+
+            this.log(chalk.redBright("Session revocated, disconnecting."));
+            this.disconnect();
+            
         } else if (data.metadata.message_type == 'session_keepalive') {
             return;
         }
@@ -103,6 +109,20 @@ export default class TwitchEventSub extends ClassEvents<string> {
         this.connect(reconnect_url);
     }
 
+    async unsubscribe() {
+        if(!this.session_id) return false;
+
+        this.log("Unsubscribed from event sub.");
+
+        if(await this.twitchModule.unSubscribeEvent(this.session_id)) {
+            this.log("Successfully unsubscripbed from event sub.");
+        } else {
+            this.log("Can't unsubscripbe from event sub.");
+        }
+
+
+    }
+
     pingTimeout:NodeJS.Timeout|null = null;
 
     async connect(url?:string) {
@@ -130,9 +150,8 @@ export default class TwitchEventSub extends ClassEvents<string> {
 
             this.pingTimeout = setTimeout(() => {
                 this.connection_lost = true;
-                    this.log("Websocket Connection Lost!");
-                    this.client?.close();
-
+                this.log("Websocket Connection Lost!");
+                this.client?.close();
             }, 7000);
         });
 
@@ -155,6 +174,7 @@ export default class TwitchEventSub extends ClassEvents<string> {
         this.client.on('close', (code, reason) => {
             this.connecting = false;
             if(!this.is_reconnecting && !this.is_disconnecting && !this.connection_lost) {
+                this.unsubscribe();
                 this.reconnect();
             }
         })
