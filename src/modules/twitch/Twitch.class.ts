@@ -19,7 +19,7 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
     started:boolean = false;
 
     job:CronJob = new CronJob(
-        "* */30 * * * *", function() {
+        "*/30 * * * *", function() {
             const twitchMod = TwitchModule.getInstance();
 
             if(twitchMod && twitchMod.started) {

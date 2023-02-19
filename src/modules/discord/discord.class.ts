@@ -1,5 +1,8 @@
 import chalk from "chalk";
-import { Client, GatewayIntentBits } from "discord.js";
+import { REST, Routes, Client, GatewayIntentBits } from "discord.js";
+import fs from "fs";
+import path from "path";
+import CommandDiscord from "./class/Command.class";
 
 export default class DiscordModule {
 
@@ -12,7 +15,12 @@ export default class DiscordModule {
     private initialized:boolean = false;
     private started:boolean = false;
 
+    commands:CommandDiscord[] = [];
+
     client:Client;
+    rest:REST = new REST({
+        version: '10'
+    });
 
     constructor() {
 
@@ -22,6 +30,10 @@ export default class DiscordModule {
                 GatewayIntentBits.GuildMembers
             ]
         });
+
+        if(this.bot_token) {
+            this.rest.setToken(this.bot_token);
+        }
 
         this.events();
 
@@ -71,6 +83,61 @@ export default class DiscordModule {
             this.log("Successfully logged in as "+client.user.username+` (${client.user.id}) working for the guild ${guild.name} (${guild.id})`);
 
         });
+
+        this.client.on("interactionCreate", async (interaction) => {
+            if(!interaction.isChatInputCommand()) return;
+
+            let command =  this.commands.find(command => command.data.name == interaction.commandName);
+
+            if(!command) return;
+
+            command.execute(interaction);
+
+        })
+    }
+
+    async getCommands() {
+        const dirpath = path.join(__dirname, "commands");
+        const commandsContents = fs.readdirSync(dirpath);
+
+        const commands:CommandDiscord[] = [];
+
+        for(let command of commandsContents) {
+            if(command.endsWith(".command.ts") || command.endsWith(".command.js")) {
+                const imports = await import(path.join(dirpath, command));
+                commands.push(imports.default);
+            }
+        }
+
+        return commands;
+
+    }
+
+    async registerCommands() {
+
+        if(!this.client_id) {
+            this.log(chalk.redBright("Can't refresh command application if not configured `CLIENT_ID`."));
+            return false;
+        }
+
+        const commands = await this.getCommands();
+
+        this.commands.push(...commands);
+
+        const commandsToRegister = commands.map(command => {
+            return command.data;
+        });
+
+        try {
+            this.log(chalk.blueBright("Refreshing application commands (/)"));
+
+            await this.rest.put(Routes.applicationCommands(this.client_id), {body: commandsToRegister});
+
+            this.log(chalk.greenBright("Application commands refreshed!"));
+        } catch(e) {
+            console.error(e); 
+        }
+
     }
 
     async start() {
@@ -79,6 +146,7 @@ export default class DiscordModule {
 
         if(!this.bot_token) return this.log("You have not configured the discord module, it has skipped its start. Read the documentation.");
 
+        await this.registerCommands();
         await this.client.login(this.bot_token);
         this.initialized = true;
     }
