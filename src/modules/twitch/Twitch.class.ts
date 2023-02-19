@@ -1,10 +1,11 @@
 import chalk from 'chalk';
 import { CronJob } from 'cron';
-import { EventSubSubscribe } from '../../api/eventSub.service';
+import { EventSubSubscribe, EventSubUnsubscribe } from '../../api/eventSub.service';
 import { GetChannelRewardRedemption } from '../../api/users.service';
 import { ActionConfig } from '../../class/Action.class';
 import AuthStore from '../../class/AuthStore.class';
 import ClassEvents from '../../class/ClassEvent.class';
+import { WebsocketSubscription } from '../../interfaces/subscriptions.interface';
 import { RewardRedemption } from '../../interfaces/TwtichRedemption.interface';
 import TwitchEventSub from './class/EventSub.class';
 import { Reward } from './class/Reward.class';
@@ -17,6 +18,8 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
     eventsub:TwitchEventSub = new TwitchEventSub(this);
 
     started:boolean = false;
+
+    subscriptions:WebsocketSubscription[] = [];
 
     job:CronJob = new CronJob(
         "*/30 * * * *", function() {
@@ -36,6 +39,36 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
             return true;
         }
         console.error(error);
+
+        this.subscriptions.push(
+            {   
+                subscription_id: data.data.id,
+                session_id
+            }
+        );
+
+        return false;
+
+    }
+
+    async unSubscribeEvent(session_id:string) {
+        
+        let subcription = await this.subscriptions.find(subscription => subscription.session_id == session_id);
+
+        if(!subcription) return false;
+
+        this.subscriptions.splice(this.subscriptions.findIndex(sub => sub.subscription_id == subcription?.subscription_id), 1);
+
+        const {data, error} = await EventSubUnsubscribe(subcription.subscription_id);
+
+        if(!error) {
+
+            return true;
+
+        } 
+
+        console.error(error);
+
         return false;
 
     }
