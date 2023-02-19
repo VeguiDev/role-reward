@@ -10,48 +10,36 @@ export default class TwitchEventSub extends ClassEvents<string> {
     session_id:string|null = null;
 
     is_reconnecting:boolean  = false;  
-    try_reconnect:boolean = false;
-    is_disconnecting:boolean = false;
 
-    recieved_pong:boolean = true;
+    connection_lost:boolean = false;
+    connection_lost_timer:NodeJS.Timeout|null = null;
+    connection_lost_tries:number = 0;
+
+    received_pong:boolean = true;
+    
+    is_disconnecting = false;
+    connecting:boolean = false;
 
     private twitchModule: TwitchModule;
+
+    log(...msg:any) {
+        this.twitchModule.log(...msg);
+    }
 
     constructor(twitchModule: TwitchModule) {
         super();
         this.twitchModule = twitchModule;
 
+        this.connection_lost_timer = setInterval(() => {
+            if(this.connection_lost && !this.connecting && !this.is_disconnecting) {
+                this.connection_lost_tries++;
 
-        setInterval(() => {
-            if(this.is_reconnecting && !this.try_reconnect) {
-
-                this.log("Trying to reconnect!");
+                this.log("Try "+this.connection_lost_tries+" to reconnect websocket!");
                 this.reconnect();
 
             }
-        }, 1000)
+        }, 2000);
 
-        setInterval(() => {
-            if(this.client && this.client.readyState == this.client.OPEN) {
-
-                if(!this.recieved_pong) {
-
-                    this.log("Connection closed!");
-                    this.client.close();
-
-                    this.is_reconnecting = true;
-
-                } else {
-                    this.recieved_pong = false;
-                }
-
-                this.client.ping();
-            }
-        }, 5000);
-    }
-
-    log(...msg:any) {
-        this.twitchModule.log(...msg);
     }
 
     private async processMessage(data: any) {
@@ -59,17 +47,26 @@ export default class TwitchEventSub extends ClassEvents<string> {
             this.session_id = data.payload.session.id;
 
             if (this.is_reconnecting && this.old_client) {
+
                 this.is_reconnecting = false;
 
+                this.old_client.removeAllListeners();
                 this.old_client.close();
 
-                this.log('Webhook reconnected!');
+                this.log('Websocket reconnected!');
             } else {
+
+                if(this.connection_lost) {
+                    this.connection_lost = false;
+                    this.connection_lost_tries = 0;
+                    this.log("Connection resume!");
+                }
+
                 if (this.session_id && await this.twitchModule.subscribeEvent(this.session_id)) {
                     this.emit('subscribed', this);
-                    this.log('Connected to EventSub event');
+                    this.log('Successfully subscribed to event!');
                 } else {
-                    this.log("Can't connect to EventSub event");
+                    this.log("Can't subscribe to event");
                 }
             }
         } else if (data.metadata.message_type == 'session_reconnect') {
@@ -98,35 +95,47 @@ export default class TwitchEventSub extends ClassEvents<string> {
     }
 
     async reconnect(reconnect_url?:string) {
-        if(this.is_reconnecting) {
-            this.try_reconnect = true;
+        
+        if(reconnect_url) {
+
+            this.old_client = this.client;
+
         }
 
-        this.old_client = this.client;
         this.connect(reconnect_url);
     }
 
+    pingTimeout:NodeJS.Timeout|null = null;
+
     async connect(url?:string) {
-        this.is_disconnecting = false;
+        this.connecting = true;
 
         this.client = new WebSocket(url || 'wss://eventsub-beta.wss.twitch.tv/ws');
 
         this.client.on('open', () => {
-            this.log('Connect to websocket');
-            
-            if(this.is_reconnecting) {
-                this.is_reconnecting = false;
-                this.try_reconnect = false;
-            }
 
-            if(this.old_client && this.old_client.readyState == this.old_client.OPEN) {
+            this.connecting = false;
+                
+            this.log('Connected to twitch websocket');
+
+            if(this.old_client && this.old_client.readyState != this.old_client.CLOSED) {
+                this.old_client.removeAllListeners();
                 this.old_client.close();
             }
 
         });
 
-        this.client.on('pong', () => {
-            this.recieved_pong = true;
+        this.client.on('ping', () => {
+            if(this.pingTimeout) {
+                clearTimeout(this.pingTimeout);
+            }
+
+            this.pingTimeout = setTimeout(() => {
+                this.connection_lost = true;
+                    this.log("Websocket Connection Lost!");
+                    this.client?.close();
+
+            }, 7000);
         });
 
         this.client.on('message', (data) => {
@@ -141,14 +150,13 @@ export default class TwitchEventSub extends ClassEvents<string> {
 
         this.client.on('error', (error) => {
             console.log(error);
-            if(this.is_reconnecting && this.try_reconnect) {
-                this.try_reconnect = false;
-            }
+            this.connecting = false;
         });
 
 
         this.client.on('close', (code, reason) => {
-            if(!this.is_reconnecting && !this.is_disconnecting) {
+            this.connecting = false;
+            if(!this.is_reconnecting && !this.is_disconnecting && !this.connection_lost) {
                 this.reconnect();
             }
         })
@@ -159,7 +167,10 @@ export default class TwitchEventSub extends ClassEvents<string> {
         this.is_disconnecting = true;
         this.session_id = null;
         this.is_reconnecting = false;
-        this.try_reconnect = false;
+
+        if(this.pingTimeout) {
+            clearTimeout(this.pingTimeout);
+        }
 
         if(this.client && this.client.readyState == 1) {
 
