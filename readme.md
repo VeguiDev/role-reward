@@ -19,6 +19,7 @@ Role Reward is a tool developed in Node.js that allows you to create advanced re
     - [Channel Endpoint](#channel-endpoint)
     - [Discord Endpoint](#discord-endpoint)
     - [Home Endpoint](#home-endpoint)
+  - [Discord Commands](#discord-commands)
 
 ## Features
 
@@ -33,7 +34,9 @@ Role Reward is a tool developed in Node.js that allows you to create advanced re
 
 - [Node.js 18.14.1](https://nodejs.org)
 - [Twitch Developers Account](https://dev.twitch.tv/)
+
 > The twitch app must have authorized urls `http://localhost:4000` and `http://localhost:4000/auth/oauth`.
+
 - [Discord Application](https://discord.com/developers)
 
 ### Guide
@@ -194,3 +197,9 @@ Create a new action.
 Get the current application status.
 
 > Remember that the REST API is insecure and should not be exposed to the internet.
+
+## Discord Commands
+
+The registered discord slash commands.
+
+- `/actions`: *List all registered actions.*
