@@ -7,6 +7,8 @@ import AuthStore from '../../class/AuthStore.class';
 import ClassEvents from '../../class/ClassEvent.class';
 import { WebsocketSubscription } from '../../interfaces/subscriptions.interface';
 import { RewardRedemption } from '../../interfaces/TwtichRedemption.interface';
+import NotificationsManager from '../discord/utils/notifications.util';
+import TwitchChat from './class/Chat.class';
 import TwitchEventSub from './class/EventSub.class';
 import { Reward } from './class/Reward.class';
 
@@ -89,6 +91,10 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
             const redemptions:RewardRedemption[] = data.data;
             
             this.log(chalk.blueBright("Found "+redemptions.length+" unredeemed rewards."))
+
+            if(redemptions.length > 0) {
+                NotificationsManager.sendDetectedNotClaimedRedemptions(action, redemptions.length);
+            }
 
             redemptions.forEach(async (redemption) => {
 
@@ -176,4 +182,5 @@ export default class TwitchModule extends ClassEvents<TwitchModuleEvents>  {
 
         return this.instance;
     }
+
 }

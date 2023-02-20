@@ -4,6 +4,8 @@ import { Action, ActionConfig, ActionReward, ActionRewardDiscordI } from "../../
 import TwitchUserI from "../../../interfaces/TwitchUser.interface";
 import DiscordModule from '../../discord/discord.class';
 import {replaceData} from '../../../api/lib/RequestDataReplacer.lib';
+import TwitchModule from "../Twitch.class";
+import NotificationsManager from "../../discord/utils/notifications.util";
 
 export class Reward {
 
@@ -34,6 +36,7 @@ export class Reward {
     }
 
     private async cancel() {
+
         const {error} = await SetChannelRewardRedemptionStatus(this.broadcaster_id, this.reward_id, this.redemption_id, "CANCELED");
         // console.log(error);
         return !error; 
@@ -51,11 +54,13 @@ export class Reward {
 
         if(!member) {
             this.cancel();
+            NotificationsManager.sendMemberNotFoundReward(this, usertag);
             return console.log(usertag, "Not found in the guild!")
         }
 
         if(member.roles.cache.hasAll(...roles)) {
             await this.cancel();
+            NotificationsManager.sendNotApplicableReward(this, member, roles);
             console.log("[REWARD] The role cannot be applied to the user ("+this.twitch_data.name+") because they already have it.")
             return false;
         }
@@ -63,7 +68,7 @@ export class Reward {
         await member.roles.add(roles);
 
         console.log("[REWARD] Applying all roles for '"+this.twitch_data.name+" ("+this.twitch_data.user_id+")' in twitch");
-
+        NotificationsManager.sendAppliedRoles(this, member, roles);
         return await this.completed();
 
     }
@@ -87,10 +92,11 @@ export class Reward {
             });
 
             this.completed();
-
+            NotificationsManager.sendAppliedReward(this);
         } catch(e) {
             console.error(e);
             this.cancel();
+            NotificationsManager.sendCancelReward(this);
         }
     }
 

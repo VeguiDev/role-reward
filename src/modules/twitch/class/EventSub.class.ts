@@ -89,9 +89,9 @@ export default class TwitchEventSub extends ClassEvents<string> {
 
             const reward = new Reward({
                 user_id: data.event.user_id,
-                name: data.event.user_login
+                name: data.event.user_login,
             }, data.event.reward.id, data.event.id, data.event.broadcaster_user_id);
-
+            console.log(reward);
             reward.apply(data.event.user_input);
 
         }
