@@ -1,4 +1,5 @@
 import axios from "axios";
+import TwitchUserI, { CannonTwitchUserI } from "../interfaces/TwitchUser.interface";
 import { RedemptionStatus, RewardI, RewardRedemption } from "../interfaces/TwtichRedemption.interface";
 import { HelixApiClient as apiClient, HelixApiClient } from "./helixApiClient";
 import { ResponseWrapper } from "./lib/ResponseWreapper.lib";
@@ -110,6 +111,20 @@ export async function DeleteChannelReward(broadcaster_id:number, reward_id:strin
         params: {
             broadcaster_id: broadcaster_id,
             id: reward_id
+        }
+    }))
+
+}
+
+export async function GetTwitchUser(user_id:number) {
+    
+    return await ResponseWrapper<{
+        data: CannonTwitchUserI[]
+    }>(apiClient({
+        url: "users",
+        method: "GET",
+        params: {
+            id: user_id
         }
     }))
 

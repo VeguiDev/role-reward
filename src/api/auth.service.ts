@@ -9,7 +9,7 @@ const apiClient = axios.create({
     }
 });
 
-export const TokenScopes = ["channel:manage:redemptions", "moderator:manage:chat_messages", "user:read:email", "chat:read"];
+export const TokenScopes = ["channel:manage:redemptions", "moderator:manage:chat_messages", "user:read:email", "chat:read", "chat:edit", "whispers:edit"];
 
 export function getAuthorizeUrl() {
     let query = new URLSearchParams();
