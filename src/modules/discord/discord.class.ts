@@ -119,7 +119,12 @@ export default class DiscordModule {
     async registerCommands() {
 
         if(!this.client_id) {
-            this.log(chalk.redBright("Can't refresh command application if not configured `CLIENT_ID`."));
+            this.log(chalk.redBright("Can't refresh command application if not configured `DISCORD_CLIENT_ID`."));
+            return false;
+        }
+
+        if(!this.guild_id) {
+            this.log(chalk.redBright("Can't refresh command application if not configured `DISCORD_GUILD_ID`."));
             return false;
         }
 

@@ -2,6 +2,7 @@ import { channelMention, EmbedBuilder } from '@discordjs/builders';
 import { ChannelType, MessageMentions, PermissionFlagsBits, PermissionsBitField, SlashCommandBuilder, TextChannel } from 'discord.js';
 import DiscordConfig from '../../../class/DiscordConfig.class';
 import CommandDiscord from '../class/Command.class';
+import DiscordModule from '../discord.class';
 
 const data = new SlashCommandBuilder()
     .setName('notifychannel')
@@ -30,6 +31,17 @@ export default new CommandDiscord({
     data: data,
     execute: (interaction) => {
         const discordConfig = DiscordConfig.getInstance();
+
+        if(interaction.guildId != DiscordModule.getInstance().guild_id) {
+            interaction.reply({
+                embeds: [
+                    new EmbedBuilder({
+                        title: "This command is only available in the target guild!"
+                    }).setColor([231, 76, 60])
+                ]
+            })
+            return;
+        }
 
         if (interaction.options.getSubcommand() == 'view') {
             const notifChannel = discordConfig.notificationChannel;
