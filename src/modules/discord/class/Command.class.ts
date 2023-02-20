@@ -1,8 +1,8 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder } from "discord.js";
+import { ChatInputCommandInteraction, SlashCommandBuilder, SlashCommandOptionsOnlyBuilder, SlashCommandSubcommandBuilder } from "discord.js";
 
 export default class CommandDiscord {
 
-    data:SlashCommandBuilder;
+    data:any;
     execute:(interaction:ChatInputCommandInteraction) => any
 
     constructor(partial:CommandDiscord) {
