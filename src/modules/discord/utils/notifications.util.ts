@@ -80,7 +80,7 @@ export default class NotificationsManager {
         const embed = new EmbedBuilder({
             author,
             title: "Can't complete action `"+reward.reward_id+"`",
-            description: "The provided user tag "+usertag+" by user is not found!",
+            description: "The provided user tag `"+usertag+"` by user is not found!",
             timestamp: new Date().toISOString()
         }).setColor([231, 76, 60]);
     
