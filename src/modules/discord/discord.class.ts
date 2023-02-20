@@ -1,8 +1,10 @@
 import chalk from "chalk";
-import { REST, Routes, Client, GatewayIntentBits } from "discord.js";
+import { REST, Routes, Client, GatewayIntentBits, Message, MessagePayload, MessageCreateOptions } from "discord.js";
 import fs from "fs";
 import path from "path";
 import CommandDiscord from "./class/Command.class";
+import DiscordConfig from "../../class/DiscordConfig.class";
+import { Reward } from "../twitch/class/Reward.class";
 
 export default class DiscordModule {
 
@@ -16,6 +18,7 @@ export default class DiscordModule {
     private started:boolean = false;
 
     commands:CommandDiscord[] = [];
+    config:DiscordConfig = DiscordConfig.getInstance();
 
     client:Client;
     rest:REST = new REST({
@@ -193,6 +196,26 @@ export default class DiscordModule {
         });
 
         return members.find(member => member.user.discriminator == tagParts[1]);
+
+    }
+
+    async sendToNotificationChannel(message:MessagePayload|MessageCreateOptions) {
+
+        if(this.config.notificationChannel) {
+
+            let guild = await this.getGuild();
+
+            if(!guild) return;
+
+            let channel = guild.channels.cache.find(channel => channel.id == this.config.notificationChannel);
+
+            if(!channel) return;
+
+            if(!channel.isTextBased()) return;
+
+            channel.send(message);
+
+        }
 
     }
 
