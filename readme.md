@@ -19,14 +19,17 @@ Role Reward is a tool developed in Node.js that allows you to create advanced re
     - [Channel Endpoint](#channel-endpoint)
     - [Discord Endpoint](#discord-endpoint)
     - [Home Endpoint](#home-endpoint)
-  - [Discord Commands](#discord-commands)
+  - [Discord](#discord)
+    - [Discord Commands](#discord-commands)
+    - [Notification Channel](#notification-channel)
 
 ## Features
 
 - Create an custom reward on twitch and link that to an action.
-- Supports discord role reward. (Apply a discord role to an user).
+- Supports Discord role reward. (Apply a discord role to an user).
 - Supports Fetch Reward. (Request to an url with custom data).
-- Have an API REST.
+- Control the application with the integrated shell.
+- Send notifications to an disocrd text channel. 
 
 ## Setup
 
@@ -198,8 +201,18 @@ Get the current application status.
 
 > Remember that the REST API is insecure and should not be exposed to the internet.
 
-## Discord Commands
+## Discord
+
+### Discord Commands
 
 The registered discord slash commands.
 
 - `/actions`: *List all registered actions.*
+- `/notify-channel set [channel]`: *Select the notifications channel. If you don't give a channel, the one in which the command is being executed will be used!*
+- `/notify-channel view`: *Shows the notifications channel if it is set.*
+
+### Notification Channel
+
+Its an text channel where the application sends notifications with example when the application complete, cancel or detect unattended redemtions.
+
+See [Discord Commands](#discord-commands) to learn the configuration commands.
