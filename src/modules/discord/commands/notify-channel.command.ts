@@ -1,5 +1,5 @@
 import { channelMention, EmbedBuilder } from '@discordjs/builders';
-import { MessageMentions, SlashCommandBuilder } from 'discord.js';
+import { ChannelType, MessageMentions, PermissionFlagsBits, PermissionsBitField, SlashCommandBuilder, TextChannel } from 'discord.js';
 import DiscordConfig from '../../../class/DiscordConfig.class';
 import CommandDiscord from '../class/Command.class';
 
@@ -12,12 +12,19 @@ const data = new SlashCommandBuilder()
             .setDescription(
                 'Makes the current channel as notification channel.'
             )
+            .addChannelOption(option => {
+                return option
+                .setName("channel")
+                .setDescription("Channel to make notification channel")
+                .addChannelTypes(ChannelType.GuildText)
+            })
     )
     .addSubcommand((subcommand) =>
         subcommand
             .setName('view')
             .setDescription('Shows the current notification channel.')
-    );
+    )
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild);
 
 export default new CommandDiscord({
     data: data,
@@ -89,10 +96,32 @@ export default new CommandDiscord({
                 return;
             }
         } else if (interaction.options.getSubcommand() == 'set') {
-            const channel = interaction.channel;
+            const channel = !interaction.options.getChannel("channel") ? interaction.channel : interaction.options.getChannel("channel");
 
             if (!channel) {
                 interaction.reply('No channel found!');
+                return;
+            }
+
+            if(!(channel instanceof TextChannel)) {
+                interaction.reply({
+                    embeds: [
+                        new EmbedBuilder({
+                            title: "The channel must be an Text Channel!"
+                        }).setColor([231, 76, 60])
+                    ]
+                })
+                return;
+            }
+
+            if(discordConfig.notificationChannel == channel.id) {
+                interaction.reply({
+                    embeds: [
+                        new EmbedBuilder({
+                            title: channel.name+" already is the notification channel!"
+                        }).setColor([231, 76, 60])
+                    ]
+                })
                 return;
             }
 
