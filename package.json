@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/VeguiDev/role-reward#readme",
   "dependencies": {
-    "axios": "^1.2.6",
+    "axios": "^1.6.0",
     "chalk": "^4.1.2",
     "discord.js": "^14.7.1",
     "dotenv": "^16.0.3",
